@@ -1,0 +1,11 @@
+const FORM_ACCESS_KEY="sf_5ccc3f4fc4a8ffa9c5626b7b";
+document.addEventListener('DOMContentLoaded',function(){
+ const toggle=document.querySelector('.nav-toggle');
+ const mobile=document.querySelector('.mobile-nav');
+ if(toggle&&mobile){toggle.addEventListener('click',()=>{const open=toggle.getAttribute('aria-expanded')!=='true';toggle.setAttribute('aria-expanded',String(open));mobile.hidden=!open;toggle.setAttribute('aria-label',open?'Close navigation':'Open navigation');});mobile.querySelectorAll('a').forEach(a=>a.addEventListener('click',()=>{mobile.hidden=true;toggle.setAttribute('aria-expanded','false');}));}
+ const form=document.getElementById('contactForm'); if(!form)return;
+ const select=document.getElementById('f-service'); const url=new URLSearchParams(window.location.search); const pick=url.get('service');if(pick&&Array.from(select.options).some(o=>o.value===pick)){select.value=pick;}
+ const status=document.getElementById('formStatus'); const button=form.querySelector('.submit-button'); const label=button.querySelector('.btn-label');
+ const report=(message,ok)=>{status.textContent=message;status.className='form-status '+(ok?'ok':'err')};
+ form.addEventListener('submit',async function(event){event.preventDefault();if(!form.checkValidity()){form.reportValidity();return;}const fields=Object.fromEntries(new FormData(form));if(fields.honeypot)return;button.disabled=true;label.textContent='Sending…';status.textContent='';try{const response=await fetch('https://api.staticforms.xyz/submit',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({accessKey:FORM_ACCESS_KEY,name:fields.name,email:fields.email,phone:fields.phone||'',company:fields.company||'',service:select.options[select.selectedIndex].text,message:fields.message,subject:'New inquiry from BDZL Media website',replyTo:'@',honeypot:''})});const result=await response.json();if(result&&result.success){report('Thanks. Your message is on its way. We’ll get back to you shortly.',true);form.reset();}else{report(result&&result.message?result.message:'Something went wrong. Please email hello@bdzlmedia.com.',false);}}catch(err){report('Network error. Please email hello@bdzlmedia.com and we’ll pick it up.',false);}finally{button.disabled=false;label.textContent='Send enquiry';}});
+});
